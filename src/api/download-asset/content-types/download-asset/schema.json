@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "download_assets",
+  "info": {
+    "singularName": "download-asset",
+    "pluralName": "download-assets",
+    "displayName": "Download Asset"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["sponsorship_deck", "report", "media_kit", "other"],
+      "required": true
+    },
+    "accessPolicy": {
+      "type": "enumeration",
+      "enum": ["public", "gated", "signed_url"],
+      "required": true,
+      "default": "public"
+    },
+    "version": {
+      "type": "string",
+      "required": true
+    },
+    "publishedAtExternal": {
+      "type": "datetime"
+    },
+    "asset": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files"],
+      "required": true
+    }
+  }
+}

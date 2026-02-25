@@ -1,0 +1,32 @@
+{
+  "kind": "singleType",
+  "collectionName": "governance_records",
+  "info": {
+    "singularName": "governance-record",
+    "pluralName": "governance-records",
+    "displayName": "Governance Record"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "cboRegistrationNumber": {
+      "type": "string",
+      "required": true
+    },
+    "boardOverview": {
+      "type": "richtext",
+      "required": true
+    },
+    "accountabilityStatement": {
+      "type": "richtext",
+      "required": true
+    },
+    "supportingAssets": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["files", "images"]
+    }
+  }
+}

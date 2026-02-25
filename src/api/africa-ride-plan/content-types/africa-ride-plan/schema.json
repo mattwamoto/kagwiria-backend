@@ -1,0 +1,52 @@
+{
+  "kind": "singleType",
+  "collectionName": "africa_ride_plans",
+  "info": {
+    "singularName": "africa-ride-plan",
+    "pluralName": "africa-ride-plans",
+    "displayName": "Africa Ride Plan"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "overview": {
+      "type": "richtext",
+      "required": true
+    },
+    "projectedCountries": {
+      "type": "json",
+      "required": true,
+      "default": []
+    },
+    "budgetSummary": {
+      "type": "richtext",
+      "required": true
+    },
+    "mediaStrategy": {
+      "type": "richtext",
+      "required": true
+    },
+    "sponsorTiers": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sponsor-tier.sponsor-tier"
+    },
+    "proposalAsset": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::download-asset.download-asset"
+    },
+    "cta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cta-config.cta-config"
+    },
+    "seoMeta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::seo-page-meta.seo-page-meta"
+    }
+  }
+}

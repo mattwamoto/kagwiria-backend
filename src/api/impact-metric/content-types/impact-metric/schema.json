@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "impact_metrics",
+  "info": {
+    "singularName": "impact-metric",
+    "pluralName": "impact-metrics",
+    "displayName": "Impact Metric"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "key": {
+      "type": "uid",
+      "targetField": "label",
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "value": {
+      "type": "string",
+      "required": true
+    },
+    "asOfDate": {
+      "type": "date",
+      "required": true
+    },
+    "sortOrder": {
+      "type": "integer",
+      "required": true,
+      "default": 0
+    },
+    "evidenceAsset": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "files"]
+    }
+  }
+}

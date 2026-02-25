@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sponsor_tiers",
+  "info": {
+    "singularName": "sponsor-tier",
+    "pluralName": "sponsor-tiers",
+    "displayName": "Sponsor Tier"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "priceRange": {
+      "type": "string",
+      "required": true
+    },
+    "benefits": {
+      "type": "json",
+      "required": true,
+      "default": []
+    },
+    "brandExposure": {
+      "type": "json",
+      "required": true,
+      "default": []
+    },
+    "availabilityStatus": {
+      "type": "enumeration",
+      "enum": ["open", "limited", "closed"],
+      "required": true,
+      "default": "open"
+    }
+  }
+}

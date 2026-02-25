@@ -1,0 +1,56 @@
+{
+  "kind": "collectionType",
+  "collectionName": "lead_events",
+  "info": {
+    "singularName": "lead-event",
+    "pluralName": "lead-events",
+    "displayName": "Lead Event"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "source": {
+      "type": "enumeration",
+      "enum": ["sponsor", "donor", "newsletter", "contact", "speaker_invite"],
+      "required": true
+    },
+    "fullName": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "phone": {
+      "type": "string"
+    },
+    "organization": {
+      "type": "string"
+    },
+    "message": {
+      "type": "text"
+    },
+    "payload": {
+      "type": "json",
+      "default": {}
+    },
+    "crmProvider": {
+      "type": "string"
+    },
+    "crmRecordId": {
+      "type": "string"
+    },
+    "syncStatus": {
+      "type": "enumeration",
+      "enum": ["pending", "synced", "failed"],
+      "required": true,
+      "default": "pending"
+    },
+    "syncError": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "kind": "singleType",
+  "collectionName": "home_pages",
+  "info": {
+    "singularName": "home-page",
+    "pluralName": "home-pages",
+    "displayName": "Home Page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "heroHeadline": {
+      "type": "string",
+      "required": true
+    },
+    "heroSubline": {
+      "type": "text",
+      "required": true
+    },
+    "bioSnapshot": {
+      "type": "richtext",
+      "required": true
+    },
+    "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "required": true
+    },
+    "primaryCta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cta-config.cta-config",
+      "required": true
+    },
+    "secondaryCta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cta-config.cta-config"
+    },
+    "featuredProjects": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::project.project"
+    },
+    "impactMetrics": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::impact-metric.impact-metric"
+    },
+    "sponsorshipSection": {
+      "type": "richtext",
+      "required": true
+    },
+    "emailCaptureHeadline": {
+      "type": "string",
+      "required": true,
+      "default": "Ride With The Mission."
+    },
+    "seoMeta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::seo-page-meta.seo-page-meta"
+    }
+  }
+}

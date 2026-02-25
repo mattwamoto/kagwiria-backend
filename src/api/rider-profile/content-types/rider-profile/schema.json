@@ -1,0 +1,42 @@
+{
+  "kind": "singleType",
+  "collectionName": "rider_profiles",
+  "info": {
+    "singularName": "rider-profile",
+    "pluralName": "rider-profiles",
+    "displayName": "Rider Profile"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "journeySince": {
+      "type": "date",
+      "required": true
+    },
+    "countiesCompleted": {
+      "type": "integer",
+      "required": true,
+      "default": 47
+    },
+    "philosophy": {
+      "type": "richtext",
+      "required": true
+    },
+    "ridingToAccessNarrative": {
+      "type": "richtext",
+      "required": true
+    },
+    "portraitAssets": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"]
+    },
+    "seoMeta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::seo-page-meta.seo-page-meta"
+    }
+  }
+}

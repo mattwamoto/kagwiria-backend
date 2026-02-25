@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "media_mentions",
+  "info": {
+    "singularName": "media-mention",
+    "pluralName": "media-mentions",
+    "displayName": "Media Mention"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "publisher": {
+      "type": "string",
+      "required": true
+    },
+    "publishedAtSource": {
+      "type": "datetime",
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["press", "tv", "radio", "podcast", "digital"],
+      "required": true,
+      "default": "digital"
+    },
+    "logoAsset": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cta_configs",
+  "info": {
+    "singularName": "cta-config",
+    "pluralName": "cta-configs",
+    "displayName": "CTA Config",
+    "description": "Reusable CTA definitions"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "destinationType": {
+      "type": "enumeration",
+      "enum": ["internal", "external", "download", "payment"],
+      "required": true
+    },
+    "destination": {
+      "type": "string",
+      "required": true
+    },
+    "trackingEventName": {
+      "type": "string",
+      "required": true
+    },
+    "placement": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

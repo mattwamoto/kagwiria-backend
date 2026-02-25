@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "seo_page_metas",
+  "info": {
+    "singularName": "seo-page-meta",
+    "pluralName": "seo-page-metas",
+    "displayName": "SEO Page Meta",
+    "description": "SEO metadata per page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 70
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "canonicalUrl": {
+      "type": "string"
+    },
+    "keywords": {
+      "type": "json",
+      "required": true,
+      "default": []
+    },
+    "ogImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}
