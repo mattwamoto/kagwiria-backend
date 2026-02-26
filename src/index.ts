@@ -15,20 +15,25 @@ const PUBLIC_PERMISSIONS: Permission[] = [
 ];
 
 async function ensurePublicPermissions(strapi: Core.Strapi) {
-  const roleService = strapi.plugin('users-permissions').service('role');
-  const permissionService = strapi.plugin('users-permissions').service('permission');
-  const publicRole = await roleService.findOne({ type: 'public' });
+  const [publicRole] = await strapi.entityService.findMany('plugin::users-permissions.role', {
+    filters: { type: 'public' },
+    limit: 1,
+  });
 
   if (!publicRole) {
     return;
   }
 
-  const existing = await permissionService.findMany({
-    filters: { role: publicRole.id },
-    populate: ['role'],
+  const existing = await strapi.entityService.findMany('plugin::users-permissions.permission', {
+    filters: { role: { id: publicRole.id } },
+    limit: 1000,
   });
 
-  const existingSet = new Set(existing.map((perm: { action: string }) => perm.action));
+  const existingSet = new Set(
+    existing
+      .map((perm: { action?: string }) => perm.action)
+      .filter((action): action is string => typeof action === 'string' && action.length > 0)
+  );
   const toCreate = PUBLIC_PERMISSIONS.filter((perm) => !existingSet.has(perm.action));
 
   if (toCreate.length === 0) {
@@ -37,7 +42,7 @@ async function ensurePublicPermissions(strapi: Core.Strapi) {
 
   await Promise.all(
     toCreate.map((perm) =>
-      permissionService.create({
+      strapi.entityService.create('plugin::users-permissions.permission', {
         data: {
           action: perm.action,
           subject: perm.subject,

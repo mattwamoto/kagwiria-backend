@@ -55,6 +55,12 @@ npm run develop
 ## Documentation Index
 - [Architecture](docs/architecture.md)
 - [Developer Guide](docs/developer-guide.md)
+- [Content API](docs/api-content.md)
+- [Admin Content Guide](docs/admin-content.md)
+
+## Next.js Reader Stub
+There is a minimal Next.js app in `apps/web` that reads blog, vlog, and documentary content from Strapi.
+It is intended as a quick verification client, not production UI.
 
 ## Contribution Expectations
 - Keep changes scoped and documented.
