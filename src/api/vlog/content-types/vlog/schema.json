@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vlogs",
+  "info": {
+    "singularName": "vlog",
+    "pluralName": "vlogs",
+    "displayName": "Vlog",
+    "description": "Video log entries with YouTube source"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "unique": true
+    },
+    "summary": {
+      "type": "text",
+      "required": true
+    },
+    "youtubeUrl": {
+      "type": "string",
+      "required": true
+    },
+    "youtubeVideoId": {
+      "type": "string"
+    },
+    "publishedOn": {
+      "type": "date"
+    },
+    "duration": {
+      "type": "string"
+    },
+    "thumbnail": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "transcript": {
+      "type": "richtext"
+    },
+    "documentary": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::documentary.documentary"
+    },
+    "seoMeta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::seo-page-meta.seo-page-meta"
+    }
+  }
+}

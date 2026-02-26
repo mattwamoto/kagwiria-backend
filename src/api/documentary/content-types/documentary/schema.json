@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "documentaries",
+  "info": {
+    "singularName": "documentary",
+    "pluralName": "documentaries",
+    "displayName": "Documentary",
+    "description": "Documentary projects and releases"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "unique": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["in_development", "in_production", "released"],
+      "required": true,
+      "default": "in_development"
+    },
+    "logline": {
+      "type": "text",
+      "required": true
+    },
+    "synopsis": {
+      "type": "richtext",
+      "required": true
+    },
+    "releaseDate": {
+      "type": "date"
+    },
+    "runtimeMinutes": {
+      "type": "integer"
+    },
+    "poster": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "trailerYoutubeUrl": {
+      "type": "string"
+    },
+    "trailerYoutubeVideoId": {
+      "type": "string"
+    },
+    "watchUrl": {
+      "type": "string"
+    },
+    "vlogs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::vlog.vlog",
+      "mappedBy": "documentary"
+    },
+    "seoMeta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::seo-page-meta.seo-page-meta"
+    }
+  }
+}

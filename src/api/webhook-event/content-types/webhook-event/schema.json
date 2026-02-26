@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "webhook_events",
+  "info": {
+    "singularName": "webhook-event",
+    "pluralName": "webhook-events",
+    "displayName": "Webhook Event",
+    "description": "Incoming provider webhook events"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "provider": {
+      "type": "enumeration",
+      "enum": ["stripe", "mpesa", "crm"],
+      "required": true
+    },
+    "eventId": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "eventType": {
+      "type": "string",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["received", "processed", "failed", "dead_letter"],
+      "required": true,
+      "default": "received"
+    },
+    "payload": {
+      "type": "json",
+      "required": true,
+      "default": {}
+    },
+    "errorMessage": {
+      "type": "text"
+    },
+    "processedAt": {
+      "type": "datetime"
+    }
+  }
+}

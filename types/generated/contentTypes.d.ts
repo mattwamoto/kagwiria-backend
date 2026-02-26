@@ -505,6 +505,51 @@ export interface ApiAwardAward extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiBlogPostBlogPost extends Struct.CollectionTypeSchema {
+  collectionName: 'blog_posts';
+  info: {
+    description: 'Written updates and stories';
+    displayName: 'Blog Post';
+    pluralName: 'blog-posts';
+    singularName: 'blog-post';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    authorName: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Kagwiria Murungi'>;
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    excerpt: Schema.Attribute.Text & Schema.Attribute.Required;
+    featuredImage: Schema.Attribute.Media<'images'>;
+    gallery: Schema.Attribute.Media<'images', true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::blog-post.blog-post'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    publishedOn: Schema.Attribute.Date;
+    seoMeta: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::seo-page-meta.seo-page-meta'
+    >;
+    slug: Schema.Attribute.UID<'title'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    tags: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiCtaConfigCtaConfig extends Struct.CollectionTypeSchema {
   collectionName: 'cta_configs';
   info: {
@@ -538,6 +583,56 @@ export interface ApiCtaConfigCtaConfig extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface ApiDocumentaryDocumentary extends Struct.CollectionTypeSchema {
+  collectionName: 'documentaries';
+  info: {
+    description: 'Documentary projects and releases';
+    displayName: 'Documentary';
+    pluralName: 'documentaries';
+    singularName: 'documentary';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::documentary.documentary'
+    > &
+      Schema.Attribute.Private;
+    logline: Schema.Attribute.Text & Schema.Attribute.Required;
+    poster: Schema.Attribute.Media<'images'>;
+    publishedAt: Schema.Attribute.DateTime;
+    releaseDate: Schema.Attribute.Date;
+    runtimeMinutes: Schema.Attribute.Integer;
+    seoMeta: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::seo-page-meta.seo-page-meta'
+    >;
+    slug: Schema.Attribute.UID<'title'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    status: Schema.Attribute.Enumeration<
+      ['in_development', 'in_production', 'released']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'in_development'>;
+    synopsis: Schema.Attribute.RichText & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    trailerYoutubeUrl: Schema.Attribute.String;
+    trailerYoutubeVideoId: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    vlogs: Schema.Attribute.Relation<'oneToMany', 'api::vlog.vlog'>;
+    watchUrl: Schema.Attribute.String;
   };
 }
 
@@ -1013,6 +1108,95 @@ export interface ApiSponsorTierSponsorTier extends Struct.CollectionTypeSchema {
       Schema.Attribute.Unique;
     priceRange: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiVlogVlog extends Struct.CollectionTypeSchema {
+  collectionName: 'vlogs';
+  info: {
+    description: 'Video log entries with YouTube source';
+    displayName: 'Vlog';
+    pluralName: 'vlogs';
+    singularName: 'vlog';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    documentary: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::documentary.documentary'
+    >;
+    duration: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::vlog.vlog'> &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    publishedOn: Schema.Attribute.Date;
+    seoMeta: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::seo-page-meta.seo-page-meta'
+    >;
+    slug: Schema.Attribute.UID<'title'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    summary: Schema.Attribute.Text & Schema.Attribute.Required;
+    thumbnail: Schema.Attribute.Media<'images'>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    transcript: Schema.Attribute.RichText;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    youtubeUrl: Schema.Attribute.String & Schema.Attribute.Required;
+    youtubeVideoId: Schema.Attribute.String;
+  };
+}
+
+export interface ApiWebhookEventWebhookEvent
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'webhook_events';
+  info: {
+    description: 'Incoming provider webhook events';
+    displayName: 'Webhook Event';
+    pluralName: 'webhook-events';
+    singularName: 'webhook-event';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    errorMessage: Schema.Attribute.Text;
+    eventId: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    eventType: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::webhook-event.webhook-event'
+    > &
+      Schema.Attribute.Private;
+    payload: Schema.Attribute.JSON &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<{}>;
+    processedAt: Schema.Attribute.DateTime;
+    provider: Schema.Attribute.Enumeration<['stripe', 'mpesa', 'crm']> &
+      Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      ['received', 'processed', 'failed', 'dead_letter']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'received'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1532,7 +1716,9 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::africa-ride-plan.africa-ride-plan': ApiAfricaRidePlanAfricaRidePlan;
       'api::award.award': ApiAwardAward;
+      'api::blog-post.blog-post': ApiBlogPostBlogPost;
       'api::cta-config.cta-config': ApiCtaConfigCtaConfig;
+      'api::documentary.documentary': ApiDocumentaryDocumentary;
       'api::download-asset.download-asset': ApiDownloadAssetDownloadAsset;
       'api::financial-summary.financial-summary': ApiFinancialSummaryFinancialSummary;
       'api::governance-record.governance-record': ApiGovernanceRecordGovernanceRecord;
@@ -1545,6 +1731,8 @@ declare module '@strapi/strapi' {
       'api::rider-profile.rider-profile': ApiRiderProfileRiderProfile;
       'api::seo-page-meta.seo-page-meta': ApiSeoPageMetaSeoPageMeta;
       'api::sponsor-tier.sponsor-tier': ApiSponsorTierSponsorTier;
+      'api::vlog.vlog': ApiVlogVlog;
+      'api::webhook-event.webhook-event': ApiWebhookEventWebhookEvent;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
