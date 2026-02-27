@@ -15,9 +15,154 @@ type WebhookInput = {
   eventId: string;
   eventType: string;
   payload: Record<string, unknown>;
+  status?: 'received' | 'processed' | 'failed' | 'dead_letter';
+  processedAt?: string;
+  errorMessage?: string;
 };
 
 const MPESA_PHONE_RE = /^254\d{9}$/;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function asText(value: unknown) {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : undefined;
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  return undefined;
+}
+
+function asNumber(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+}
+
+function parseMpesaTimestamp(value: unknown) {
+  const raw = asText(value);
+  if (!raw || !/^\d{14}$/.test(raw)) {
+    return undefined;
+  }
+
+  const year = Number(raw.slice(0, 4));
+  const month = Number(raw.slice(4, 6));
+  const day = Number(raw.slice(6, 8));
+  const hour = Number(raw.slice(8, 10));
+  const minute = Number(raw.slice(10, 12));
+  const second = Number(raw.slice(12, 14));
+
+  const date = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
+function payloadHash(payload: Record<string, unknown>) {
+  return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex').slice(0, 24);
+}
+
+function normalizeWebhook(
+  provider: WebhookInput['provider'],
+  payload: Record<string, unknown>
+): WebhookInput {
+  if (provider !== 'mpesa') {
+    const eventId = asText(payload.eventId) || asText(payload.id);
+    const eventType = asText(payload.eventType) || asText(payload.type) || 'unknown';
+
+    if (!eventId) {
+      throw new Error('eventId is required');
+    }
+
+    return {
+      provider,
+      eventId,
+      eventType,
+      payload,
+      status: 'received',
+    };
+  }
+
+  const body = isRecord(payload.Body) ? payload.Body : undefined;
+  const callback = body && isRecord(body.stkCallback) ? body.stkCallback : undefined;
+
+  if (!callback) {
+    const eventId = asText(payload.eventId) || asText(payload.id);
+    const eventType = asText(payload.eventType) || asText(payload.type) || 'mpesa.webhook';
+
+    if (!eventId) {
+      throw new Error('M-Pesa callback is missing Body.stkCallback and eventId');
+    }
+
+    return {
+      provider,
+      eventId,
+      eventType,
+      payload,
+      status: 'received',
+    };
+  }
+
+  const checkoutRequestId = asText(callback.CheckoutRequestID);
+  const merchantRequestId = asText(callback.MerchantRequestID);
+  const resultCode = asNumber(callback.ResultCode);
+  const resultDesc = asText(callback.ResultDesc);
+
+  let metadata: Record<string, unknown> = {};
+  const callbackMetadata = isRecord(callback.CallbackMetadata) ? callback.CallbackMetadata : undefined;
+  const items = callbackMetadata && Array.isArray(callbackMetadata.Item) ? callbackMetadata.Item : [];
+
+  for (const item of items) {
+    if (!isRecord(item)) continue;
+    const key = asText(item.Name);
+    if (!key) continue;
+    metadata[key] = item.Value;
+  }
+
+  const amount = asNumber(metadata.Amount);
+  const receiptNumber = asText(metadata.MpesaReceiptNumber);
+  const transactionDate = asText(metadata.TransactionDate);
+  const phone = asText(metadata.PhoneNumber);
+
+  const eventId = checkoutRequestId || merchantRequestId || `mpesa-${payloadHash(payload)}`;
+  const success = resultCode === 0;
+
+  const normalizedPayload: Record<string, unknown> = {
+    merchantRequestId,
+    checkoutRequestId,
+    resultCode,
+    resultDescription: resultDesc,
+    amount,
+    receiptNumber,
+    transactionDate,
+    transactionDateIso: parseMpesaTimestamp(transactionDate),
+    phoneNumber: phone,
+    accountReference: asText(metadata.AccountReference),
+    callbackMetadata: metadata,
+    raw: payload,
+  };
+
+  return {
+    provider,
+    eventId,
+    eventType: success ? 'mpesa.stk.success' : 'mpesa.stk.failed',
+    payload: normalizedPayload,
+    status: success ? 'processed' : 'failed',
+    processedAt: new Date().toISOString(),
+    errorMessage: success ? undefined : resultDesc || 'M-Pesa callback returned a failure result',
+  };
+}
 
 function getRequiredEnv(name: string) {
   const value = process.env[name];
@@ -48,6 +193,10 @@ function normalizeMpesaPhone(phone: string) {
 }
 
 export default factories.createCoreService('api::lead-event.lead-event', ({ strapi }) => ({
+  normalizeWebhookPayload(provider: WebhookInput['provider'], payload: Record<string, unknown>) {
+    return normalizeWebhook(provider, payload);
+  },
+
   verifyWebhookSignature(
     provider: WebhookInput['provider'],
     payload: Record<string, unknown>,
@@ -110,15 +259,27 @@ export default factories.createCoreService('api::lead-event.lead-event', ({ stra
       const cancelUrl = process.env.STRIPE_CANCEL_URL ?? 'http://localhost:3000/get-involved?status=cancelled';
       const amountMinor = toMinorUnits(input.amount, currency);
 
-      if (frequency === 'monthly') {
-        const monthlyPriceId = getRequiredEnv('STRIPE_PRICE_MONTHLY_SUPPORTER');
+      if (frequency === 'monthly' || frequency === 'one_time') {
         const body = new URLSearchParams({
-          mode: 'subscription',
           success_url: successUrl,
           cancel_url: cancelUrl,
-          'line_items[0][price]': monthlyPriceId,
           'line_items[0][quantity]': '1',
         });
+
+        if (frequency === 'monthly') {
+          const monthlyPriceId = getRequiredEnv('STRIPE_PRICE_MONTHLY_SUPPORTER');
+          body.set('mode', 'subscription');
+          body.set('line_items[0][price]', monthlyPriceId);
+        } else {
+          body.set('mode', 'payment');
+          body.set('line_items[0][price_data][currency]', currency.toLowerCase());
+          body.set('line_items[0][price_data][unit_amount]', String(amountMinor));
+          body.set('line_items[0][price_data][product_data][name]', 'Kagwiria Donation');
+        }
+
+        if (input.email?.trim()) {
+          body.set('customer_email', input.email.trim().toLowerCase());
+        }
 
         const response = await fetch(`${stripeApiBase}/v1/checkout/sessions`, {
           method: 'POST',
@@ -277,7 +438,9 @@ export default factories.createCoreService('api::lead-event.lead-event', ({ stra
         eventId: input.eventId,
         eventType: input.eventType,
         payload: input.payload as any,
-        status: 'received',
+        status: input.status ?? 'received',
+        processedAt: input.processedAt,
+        errorMessage: input.errorMessage,
       },
     });
 

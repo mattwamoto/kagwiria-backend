@@ -84,12 +84,13 @@ This guide is for engineers onboarding to build and operate the Kagwiria platfor
 - `STRIPE_PRICE_MONTHLY_SUPPORTER` (optional)
 
 ### `mpesa`
-- `MPESA_PROVIDER` (required)
 - `MPESA_CONSUMER_KEY` (required)
 - `MPESA_CONSUMER_SECRET` (required)
 - `MPESA_PASSKEY` (required)
 - `MPESA_SHORTCODE` (required)
-- `MPESA_WEBHOOK_SECRET` (required if supported)
+- `MPESA_CALLBACK_URL` (required; set to public callback route, e.g. `http://localhost:3000/api/webhooks/mpesa` for local proxy)
+- `MPESA_API_BASE` (optional; defaults to Safaricom sandbox base URL)
+- `MPESA_WEBHOOK_SECRET` (optional; only when provider supports signature headers)
 
 ### `crm`
 - `CRM_PROVIDER` (required)
@@ -154,6 +155,8 @@ This guide is for engineers onboarding to build and operate the Kagwiria platfor
 - `POST /api/webhooks/stripe`
 - `POST /api/webhooks/mpesa`
 - `POST /api/webhooks/{provider}`
+- In local/dev topology, expose callback via Next.js route and proxy to Strapi:
+  - `apps/web/pages/api/webhooks/[provider].js` -> `http://localhost:1337/api/webhooks/:provider`
 - Verify signatures before parse/processing.
 - Persist event IDs and idempotency keys.
 - Mark events as `received`, `processed`, `failed`, `dead_letter`.

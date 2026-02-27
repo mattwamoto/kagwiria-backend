@@ -1,6 +1,7 @@
 import { CMS_URL } from "/lib/cms";
 
 const YT_ID_RE = /^[A-Za-z0-9_-]{11}$/;
+const YT_PLAYLIST_HINT_RE = /^(PL|UU|FL|RD|OLAK5uy_)[A-Za-z0-9_-]+$/;
 
 export const fallbackImages = [
   "/img/kagwiria/hero/hero-1.jpeg",
@@ -80,6 +81,35 @@ export function getYoutubeId(value) {
 
 export function youtubeThumb(videoId) {
   return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+}
+
+export function getYoutubePlaylistId(value) {
+  if (!value || typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (YT_PLAYLIST_HINT_RE.test(trimmed)) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const fromQuery = parsed.searchParams.get("list");
+    if (fromQuery && YT_PLAYLIST_HINT_RE.test(fromQuery)) {
+      return fromQuery;
+    }
+  } catch (_) {
+    return null;
+  }
+
+  return null;
+}
+
+export function youtubePlaylistEmbed(playlistId) {
+  return playlistId
+    ? `https://www.youtube.com/embed/videoseries?list=${playlistId}`
+    : null;
 }
 
 export function pickFallbackImage(index = 0) {

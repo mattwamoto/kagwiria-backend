@@ -40,6 +40,10 @@ export default factories.createCoreController('api::lead-event.lead-event', ({ s
     try {
       const body = (ctx.request.body ?? {}) as Record<string, unknown>;
       const data = (body.data ?? body) as Record<string, unknown>;
+      const normalized = strapi
+        .service('api::integration.integration')
+        .normalizeWebhookPayload(providerParam, data);
+
       const signatureHeaderNames: Record<Provider, string> = {
         stripe: 'stripe-signature',
         mpesa: 'x-mpesa-signature',
@@ -47,23 +51,13 @@ export default factories.createCoreController('api::lead-event.lead-event', ({ s
       };
       const signatureHeader = String(ctx.request.headers[signatureHeaderNames[providerParam]] ?? '').trim() || undefined;
 
-      const eventId = String(data.eventId ?? data.id ?? '').trim();
-      const eventType = String(data.eventType ?? data.type ?? 'unknown').trim();
-
-      if (!eventId) {
-        return ctx.badRequest('eventId is required');
-      }
-
       const signatureResult = strapi
         .service('api::integration.integration')
         .verifyWebhookSignature(providerParam, data, signatureHeader);
 
-      const result = await strapi.service('api::integration.integration').recordWebhook({
-        provider: providerParam,
-        eventId,
-        eventType,
-        payload: data,
-      });
+      const result = await strapi
+        .service('api::integration.integration')
+        .recordWebhook(normalized);
 
       ctx.send({
         data: {

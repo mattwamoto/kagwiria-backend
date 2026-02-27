@@ -18,6 +18,15 @@ import sectionStyles from "/styles/jss/nextjs-material-kit/pages/kagwiriaSection
 
 const useStyles = makeStyles({ ...styles, ...sectionStyles });
 
+function readApiError(payload, fallback) {
+  if (!payload) return fallback;
+  if (typeof payload === "string" && payload.trim()) return payload;
+  if (typeof payload?.error === "string" && payload.error.trim()) return payload.error;
+  if (typeof payload?.message === "string" && payload.message.trim()) return payload.message;
+  if (typeof payload?.error?.message === "string" && payload.error.message.trim()) return payload.error.message;
+  return fallback;
+}
+
 export default function GetInvolvedPage() {
   const classes = useStyles();
 
@@ -54,7 +63,7 @@ export default function GetInvolvedPage() {
 
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || "Unable to submit right now.");
+        throw new Error(readApiError(payload, "Unable to submit right now."));
       }
 
       setLead({ fullName: "", email: "", phone: "", message: "" });
@@ -75,6 +84,11 @@ export default function GetInvolvedPage() {
       return;
     }
 
+    if (donation.provider === "mpesa" && !donation.phone.trim()) {
+      setDonationStatus("Phone number is required for M-Pesa.");
+      return;
+    }
+
     setSubmittingDonation(true);
     try {
       const response = await fetch("/api/donation/create-intent", {
@@ -92,12 +106,19 @@ export default function GetInvolvedPage() {
 
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || "Unable to start donation.");
+        throw new Error(readApiError(payload, "Unable to start donation."));
       }
 
       const data = payload?.data || {};
       if (data.checkoutUrl) {
-        window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
+        // Use same-tab redirect to avoid popup blockers after async network calls.
+        window.location.assign(data.checkoutUrl);
+        return;
+      }
+
+      if ((data.provider || donation.provider) === "mpesa") {
+        setDonationStatus(data.customerMessage || `M-Pesa prompt sent to ${donation.phone}. Complete payment on your phone.`);
+        return;
       }
 
       setDonationStatus(`Donation initialized (${data.provider || donation.provider}). Ref: ${data.reference || "pending"}`);
