@@ -6,15 +6,12 @@ import styles from "/styles/jss/nextjs-material-kit/pages/kagwiriaSections.js";
 
 const useStyles = makeStyles(styles);
 
-const awards = [
-  "East Africa Female Biker of the Year 2024",
-  "Influence and Impact Award 2026"
-];
+const defaultAwards = ["East Africa Female Biker of the Year 2024", "Influence and Impact Award 2026"];
+const defaultMedia = ["Nation TV", "Citizen", "BBC Africa", "Al Jazeera", "Adventure Riders Network"];
 
-const media = ["Nation TV", "Citizen", "BBC Africa", "Al Jazeera", "Adventure Riders Network"];
-
-export default function MediaAwardsSection() {
+export default function MediaAwardsSection({ awards = defaultAwards, mediaMentions = defaultMedia }) {
   const classes = useStyles();
+
   return (
     <div className={classes.section}>
       <h2 className={classes.title}>Media and awards</h2>
@@ -30,7 +27,7 @@ export default function MediaAwardsSection() {
         <GridItem xs={12} sm={12} md={6}>
           <h4 className={classes.cardTitle}>Media mentions</h4>
           <div className={classes.inlineList}>
-            {media.map((item) => (
+            {mediaMentions.map((item) => (
               <span className={classes.badge} key={item}>{item}</span>
             ))}
           </div>

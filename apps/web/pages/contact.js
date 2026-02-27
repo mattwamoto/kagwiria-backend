@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -18,8 +18,49 @@ import sectionStyles from "/styles/jss/nextjs-material-kit/pages/kagwiriaSection
 
 const useStyles = makeStyles({ ...styles, ...sectionStyles });
 
-export default function ContactPage(props) {
+export default function ContactPage() {
   const classes = useStyles();
+  const [form, setForm] = useState({ fullName: "", email: "", message: "" });
+  const [status, setStatus] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const submitContact = async (event) => {
+    event.preventDefault();
+    setStatus("");
+
+    if (!form.fullName.trim() || !form.email.trim()) {
+      setStatus("Name and email are required.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source: "contact",
+          fullName: form.fullName.trim(),
+          email: form.email.trim(),
+          message: form.message.trim() || undefined,
+          payload: { location: "contact-page" },
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.error || payload?.message || "Unable to send message.");
+      }
+
+      setForm({ fullName: "", email: "", message: "" });
+      setStatus("Message sent successfully.");
+    } catch (error) {
+      setStatus(error.message || "Unable to send message.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div>
       <Header
@@ -28,9 +69,8 @@ export default function ContactPage(props) {
         rightLinks={<HeaderLinks />}
         fixed
         changeColorOnScroll={{ height: 300, color: "white" }}
-        {...props}
       />
-      <Parallax small filter image="/img/bg1.jpg">
+      <Parallax small filter image="/img/bg.jpg">
         <div className={classes.container}>
           <GridContainer>
             <GridItem xs={12} sm={12} md={8}>
@@ -47,18 +87,43 @@ export default function ContactPage(props) {
               <Card>
                 <CardBody>
                   <h3 className={classes.cardTitle}>Send a message</h3>
-                  <GridContainer>
-                    <GridItem xs={12} sm={12} md={6}>
-                      <CustomInput labelText="Name" id="name" formControlProps={{ fullWidth: true }} />
-                    </GridItem>
-                    <GridItem xs={12} sm={12} md={6}>
-                      <CustomInput labelText="Email" id="email" formControlProps={{ fullWidth: true }} />
-                    </GridItem>
-                    <GridItem xs={12} sm={12} md={12}>
-                      <CustomInput labelText="Message" id="message" formControlProps={{ fullWidth: true }} inputProps={{ multiline: true, rows: 4 }} />
-                    </GridItem>
-                  </GridContainer>
-                  <Button color="primary">Send</Button>
+                  <form onSubmit={submitContact}>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <CustomInput
+                          labelText="Name"
+                          id="contact-name"
+                          formControlProps={{ fullWidth: true }}
+                          inputProps={{ value: form.fullName, onChange: (e) => setForm({ ...form, fullName: e.target.value }) }}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <CustomInput
+                          labelText="Email"
+                          id="contact-email"
+                          formControlProps={{ fullWidth: true }}
+                          inputProps={{ value: form.email, onChange: (e) => setForm({ ...form, email: e.target.value }) }}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <CustomInput
+                          labelText="Message"
+                          id="contact-message"
+                          formControlProps={{ fullWidth: true }}
+                          inputProps={{
+                            multiline: true,
+                            rows: 4,
+                            value: form.message,
+                            onChange: (e) => setForm({ ...form, message: e.target.value }),
+                          }}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                    <Button color="primary" type="submit" disabled={submitting}>
+                      {submitting ? "Sending..." : "Send"}
+                    </Button>
+                  </form>
+                  {status ? <p>{status}</p> : null}
                 </CardBody>
               </Card>
             </GridItem>

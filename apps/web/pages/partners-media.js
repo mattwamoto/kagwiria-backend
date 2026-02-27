@@ -13,11 +13,15 @@ import Parallax from "/components/Parallax/Parallax.js";
 
 import styles from "/styles/jss/nextjs-material-kit/pages/landingPage.js";
 import sectionStyles from "/styles/jss/nextjs-material-kit/pages/kagwiriaSections.js";
+import { safeCms } from "/lib/cms";
 
 const useStyles = makeStyles({ ...styles, ...sectionStyles });
 
-export default function PartnersMediaPage(props) {
+export default function PartnersMediaPage({ partners, mediaMentions }) {
   const classes = useStyles();
+  const partnerNames = partners.map((item) => item.name).filter(Boolean);
+  const mediaNames = mediaMentions.map((item) => item.publisher || item.title).filter(Boolean);
+
   return (
     <div>
       <Header
@@ -26,9 +30,8 @@ export default function PartnersMediaPage(props) {
         rightLinks={<HeaderLinks />}
         fixed
         changeColorOnScroll={{ height: 300, color: "white" }}
-        {...props}
       />
-      <Parallax small filter image="/img/bg8.jpg">
+      <Parallax small filter image="/img/bg3.jpg">
         <div className={classes.container}>
           <GridContainer>
             <GridItem xs={12} sm={12} md={8}>
@@ -46,7 +49,7 @@ export default function PartnersMediaPage(props) {
                 <CardBody>
                   <h3 className={classes.cardTitle}>Partners</h3>
                   <div className={classes.inlineList}>
-                    {["Education Trust", "Rider Alliance", "Corporate Partner", "CBO Board"].map((item) => (
+                    {(partnerNames.length ? partnerNames : ["Partner profiles coming soon"]).map((item) => (
                       <span className={classes.badge} key={item}>{item}</span>
                     ))}
                   </div>
@@ -58,7 +61,7 @@ export default function PartnersMediaPage(props) {
                 <CardBody>
                   <h3 className={classes.cardTitle}>Media mentions</h3>
                   <div className={classes.inlineList}>
-                    {["Nation TV", "Citizen", "BBC Africa", "Al Jazeera", "Adventure Riders Network"].map((item) => (
+                    {(mediaNames.length ? mediaNames : ["Media mentions coming soon"]).map((item) => (
                       <span className={classes.badge} key={item}>{item}</span>
                     ))}
                   </div>
@@ -71,4 +74,13 @@ export default function PartnersMediaPage(props) {
       <Footer />
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  const [partners, mediaMentions] = await Promise.all([
+    safeCms("/api/partner-logos?sort=createdAt:desc", []),
+    safeCms("/api/media-mentions?sort=publishedAtSource:desc", []),
+  ]);
+
+  return { props: { partners, mediaMentions } };
 }

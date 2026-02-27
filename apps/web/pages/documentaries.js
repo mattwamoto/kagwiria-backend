@@ -13,15 +13,44 @@ import Parallax from "/components/Parallax/Parallax.js";
 
 import styles from "/styles/jss/nextjs-material-kit/pages/landingPage.js";
 import sectionStyles from "/styles/jss/nextjs-material-kit/pages/kagwiriaSections.js";
+import { safeCms } from "/lib/cms";
+import { getMediaUrl, getYoutubeId, youtubeThumb, pickFallbackImage } from "/lib/content";
 
 const useStyles = makeStyles({ ...styles, ...sectionStyles });
 
-export default function DocumentariesPage(props) {
+const fallbackDocs = [
+  {
+    slug: "africa-ride-documentary",
+    title: "Africa Ride Documentary",
+    status: "in_development",
+    logline: "A long-form account of how riding creates infrastructure funding.",
+    trailerYoutubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  },
+  {
+    slug: "turkana-literacy-documentary",
+    title: "Turkana Literacy Hub",
+    status: "in_production",
+    logline: "An on-ground portrait of community-led literacy expansion.",
+    trailerYoutubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  },
+];
+
+function mergeWithFallback(documentaries) {
+  const merged = [...documentaries];
+  const slugs = new Set(merged.map((item) => item.slug));
+
+  for (const fallback of fallbackDocs) {
+    if (!slugs.has(fallback.slug)) {
+      merged.push(fallback);
+    }
+  }
+
+  return merged.slice(0, 12);
+}
+
+export default function DocumentariesPage({ documentaries }) {
   const classes = useStyles();
-  const docs = [
-    { title: "Africa Ride Documentary", status: "In development" },
-    { title: "Turkana Literacy Hub", status: "In production" }
-  ];
+  const items = mergeWithFallback(documentaries);
 
   return (
     <div>
@@ -31,9 +60,8 @@ export default function DocumentariesPage(props) {
         rightLinks={<HeaderLinks />}
         fixed
         changeColorOnScroll={{ height: 300, color: "white" }}
-        {...props}
       />
-      <Parallax small filter image="/img/bg5.jpg">
+      <Parallax small filter image="/img/bg.jpg">
         <div className={classes.container}>
           <GridContainer>
             <GridItem xs={12} sm={12} md={8}>
@@ -46,20 +74,44 @@ export default function DocumentariesPage(props) {
       <div className={classNames(classes.main, classes.mainRaised)}>
         <div className={classes.section}>
           <GridContainer>
-            {docs.map((doc) => (
-              <GridItem xs={12} sm={6} md={4} key={doc.title}>
-                <Card>
-                  <CardBody>
-                    <h4 className={classes.cardTitle}>{doc.title}</h4>
-                    <p>{doc.status}</p>
-                  </CardBody>
-                </Card>
-              </GridItem>
-            ))}
+            {items.map((doc, index) => {
+              const trailerId = getYoutubeId(doc.trailerYoutubeVideoId) || getYoutubeId(doc.trailerYoutubeUrl);
+              const poster = getMediaUrl(doc.poster) || youtubeThumb(trailerId) || pickFallbackImage(index + 2);
+
+              return (
+                <GridItem xs={12} sm={6} md={4} key={doc.slug || doc.title}>
+                  <Card className={classes.mediaCard}>
+                    <div className={classes.mediaWrap}>
+                      {trailerId ? (
+                        <iframe
+                          title={doc.title}
+                          src={`https://www.youtube.com/embed/${trailerId}`}
+                          className={classes.mediaFrame}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <img src={poster} alt={doc.title} className={classes.mediaImage} />
+                      )}
+                    </div>
+                    <CardBody>
+                      <h4 className={classes.cardTitle}>{doc.title}</h4>
+                      <p>{doc.logline || "Documentary update coming soon."}</p>
+                      <p className={classes.cardMeta}>{String(doc.status || "status pending").replaceAll("_", " ")}</p>
+                    </CardBody>
+                  </Card>
+                </GridItem>
+              );
+            })}
           </GridContainer>
         </div>
       </div>
       <Footer />
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  const documentaries = await safeCms("/api/documentaries?sort=releaseDate:desc", []);
+  return { props: { documentaries } };
 }

@@ -42,12 +42,13 @@ const headerStyle = {
   },
   container: {
     ...container,
-    minHeight: "50px",
+    minHeight: "74px",
     flex: "1",
     alignItems: "center",
     justifyContent: "space-between",
     display: "flex",
-    flexWrap: "nowrap"
+    flexWrap: "nowrap",
+    transition: "min-height 220ms ease"
   },
   flex: {
     flex: 1
@@ -59,12 +60,30 @@ const headerStyle = {
     borderRadius: "3px",
     textTransform: "none",
     color: "inherit",
-    padding: "8px 16px",
+    padding: "6px 12px",
     letterSpacing: "unset",
     "&:hover,&:focus": {
       color: "inherit",
       background: "transparent"
     }
+  },
+  brandIdentity: {
+    display: "inline-flex",
+    alignItems: "center"
+  },
+  brandLogo: {
+    width: "auto",
+    height: "64px",
+    maxWidth: "260px",
+    borderRadius: "6px",
+    objectFit: "contain",
+    boxShadow: "0 6px 16px rgba(15, 23, 42, 0.25)",
+    backgroundColor: "#fff",
+    transition: "height 220ms ease, max-width 220ms ease, transform 220ms ease, box-shadow 220ms ease"
+  },
+  brandText: {
+    fontWeight: "700",
+    letterSpacing: "0.01em"
   },
   appResponsive: {
     margin: "20px 10px"
@@ -123,6 +142,26 @@ const headerStyle = {
     paddingTop: "25px",
     color: "#FFFFFF"
   },
+  overlay: {
+    color: "#FFFFFF",
+    backgroundColor: "rgba(7, 13, 24, 0.74) !important",
+    backdropFilter: "blur(9px)",
+    WebkitBackdropFilter: "blur(9px)",
+    boxShadow: "0 8px 24px rgba(5, 10, 18, 0.35)"
+  },
+  scrolled: {
+    paddingTop: "8px",
+    paddingBottom: "8px",
+    "& $container": {
+      minHeight: "92px"
+    },
+    "& $brandLogo": {
+      height: "82px",
+      maxWidth: "340px",
+      transform: "scale(1.03)",
+      boxShadow: "0 10px 24px rgba(5, 10, 18, 0.34)"
+    }
+  },
   dark: {
     color: "#FFFFFF",
     backgroundColor: "#212121 !important",
@@ -159,6 +198,27 @@ const headerStyle = {
     paddingRight: "0px",
     paddingLeft: "0",
     ...transition
+  },
+  "@media (max-width: 767px)": {
+    container: {
+      minHeight: "68px"
+    },
+    brandLogo: {
+      height: "58px",
+      maxWidth: "230px"
+    },
+    brandText: {
+      fontSize: "16px"
+    },
+    scrolled: {
+      "& $container": {
+        minHeight: "82px"
+      },
+      "& $brandLogo": {
+        height: "74px",
+        maxWidth: "280px"
+      }
+    }
   }
 };
 

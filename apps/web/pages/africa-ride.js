@@ -14,13 +14,18 @@ import Parallax from "/components/Parallax/Parallax.js";
 
 import styles from "/styles/jss/nextjs-material-kit/pages/landingPage.js";
 import sectionStyles from "/styles/jss/nextjs-material-kit/pages/kagwiriaSections.js";
+import { safeCms } from "/lib/cms";
 
 const useStyles = makeStyles({ ...styles, ...sectionStyles });
 
-const countries = ["Kenya", "Uganda", "Tanzania", "Rwanda", "Ethiopia", "Namibia", "South Africa"];
+const fallbackCountries = ["Kenya", "Uganda", "Tanzania", "Rwanda", "Ethiopia", "Namibia", "South Africa"];
 
-export default function AfricaRidePage(props) {
+export default function AfricaRidePage({ plan, sponsorTiers }) {
   const classes = useStyles();
+  const countries = Array.isArray(plan?.projectedCountries) && plan.projectedCountries.length
+    ? plan.projectedCountries
+    : fallbackCountries;
+
   return (
     <div>
       <Header
@@ -29,14 +34,13 @@ export default function AfricaRidePage(props) {
         rightLinks={<HeaderLinks />}
         fixed
         changeColorOnScroll={{ height: 300, color: "white" }}
-        {...props}
       />
       <Parallax small filter image="/img/bg.jpg">
         <div className={classes.container}>
           <GridContainer>
             <GridItem xs={12} sm={12} md={8}>
               <h1 className={classes.title}>The flagship expedition.</h1>
-              <h4>Continental ride to scale partnerships, funding, and visibility for rural education.</h4>
+              <h4>{plan?.overview || "Continental ride to scale partnerships, funding, and visibility for rural education."}</h4>
             </GridItem>
           </GridContainer>
         </div>
@@ -49,7 +53,7 @@ export default function AfricaRidePage(props) {
                 <Card>
                   <CardBody>
                     <h3 className={classes.cardTitle}>Purpose</h3>
-                    <p>Generate visibility and funding for literacy hubs and classrooms across Africa.</p>
+                    <p>{plan?.overview || "Generate visibility and funding for literacy hubs and classrooms across Africa."}</p>
                     <h3 className={classes.cardTitle}>Projected countries</h3>
                     <div className={classes.inlineList}>
                       {countries.map((country) => (
@@ -63,10 +67,14 @@ export default function AfricaRidePage(props) {
                 <Card>
                   <CardBody>
                     <h3 className={classes.cardTitle}>Budget summary</h3>
-                    <p>Multi-country logistics, media crew, safety, and program delivery. Detailed breakdown in the sponsorship deck.</p>
+                    <p>{plan?.budgetSummary || "Multi-country logistics, media crew, safety, and program delivery."}</p>
                     <h3 className={classes.cardTitle}>Sponsorship tiers</h3>
-                    <p>Title Partner, Route Sponsor, Impact Sponsor, Media Partner.</p>
-                    <Button color="primary">Download proposal</Button>
+                    <p>
+                      {sponsorTiers.length
+                        ? sponsorTiers.map((tier) => tier.name).filter(Boolean).join(", ")
+                        : "Title Partner, Route Sponsor, Impact Sponsor, Media Partner."}
+                    </p>
+                    <Button color="primary" href="/get-involved">Download proposal</Button>
                   </CardBody>
                 </Card>
               </GridItem>
@@ -77,4 +85,13 @@ export default function AfricaRidePage(props) {
       <Footer />
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  const [plan, sponsorTiers] = await Promise.all([
+    safeCms("/api/africa-ride-plan", null),
+    safeCms("/api/sponsor-tiers?sort=name:asc", []),
+  ]);
+
+  return { props: { plan, sponsorTiers } };
 }

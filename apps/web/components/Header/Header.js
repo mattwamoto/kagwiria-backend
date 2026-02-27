@@ -37,33 +37,47 @@ export default function Header(props) {
   };
   const headerColorChange = () => {
     const { color, changeColorOnScroll } = props;
+    const header = document.body.getElementsByTagName("header")[0];
+    if (!header) return;
     const windowsScrollTop = window.pageYOffset;
     if (windowsScrollTop > changeColorOnScroll.height) {
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.remove(classes[color]);
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.add(classes[changeColorOnScroll.color]);
+      header.classList.remove(classes[color]);
+      header.classList.add(classes[changeColorOnScroll.color]);
+      header.classList.add(classes.scrolled);
     } else {
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.add(classes[color]);
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.remove(classes[changeColorOnScroll.color]);
+      header.classList.add(classes[color]);
+      header.classList.remove(classes[changeColorOnScroll.color]);
+      header.classList.remove(classes.scrolled);
     }
   };
-  const { color, rightLinks, leftLinks, brand, fixed, absolute } = props;
+  const {
+    color,
+    rightLinks,
+    leftLinks,
+    brand,
+    fixed,
+    absolute,
+    logoSrc,
+    logoAlt,
+  } = props;
   const appBarClasses = classNames({
     [classes.appBar]: true,
     [classes[color]]: color,
     [classes.absolute]: absolute,
     [classes.fixed]: fixed
   });
+  const brandLabel = typeof brand === "string" && brand.trim() ? brand : "Kagwiria";
   const brandComponent = (
-    <Link href="/components" as="/components">
-      <Button className={classes.title}>{brand}</Button>
+    <Link href="/" as="/">
+      <Button className={classes.title}>
+        <span className={classes.brandIdentity}>
+          {logoSrc ? (
+            <img src={logoSrc} alt={logoAlt || "Brand logo"} className={classes.brandLogo} />
+          ) : (
+            <span className={classes.brandText}>{brandLabel}</span>
+          )}
+        </span>
+      </Button>
     </Link>
   );
   return (
@@ -112,10 +126,6 @@ export default function Header(props) {
   );
 }
 
-Header.defaultProp = {
-  color: "white"
-};
-
 Header.propTypes = {
   color: PropTypes.oneOf([
     "primary",
@@ -124,13 +134,16 @@ Header.propTypes = {
     "warning",
     "danger",
     "transparent",
+    "overlay",
     "white",
     "rose",
     "dark"
   ]),
   rightLinks: PropTypes.node,
   leftLinks: PropTypes.node,
-  brand: PropTypes.string,
+  brand: PropTypes.node,
+  logoSrc: PropTypes.string,
+  logoAlt: PropTypes.string,
   fixed: PropTypes.bool,
   absolute: PropTypes.bool,
   // this will cause the sidebar to change the color from
@@ -148,9 +161,16 @@ Header.propTypes = {
       "warning",
       "danger",
       "transparent",
+      "overlay",
       "white",
       "rose",
       "dark"
     ]).isRequired
   })
+};
+
+Header.defaultProps = {
+  color: "white",
+  logoSrc: "/img/brand/kagwiria-logo.jpg",
+  logoAlt: "Kagwiria logo",
 };
