@@ -1,0 +1,59 @@
+name: kagwiria
+
+services:
+  cms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 1337
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: ${DATABASE_HOST:?Set DATABASE_HOST in .env}
+      DATABASE_PORT: ${DATABASE_PORT:?Set DATABASE_PORT in .env}
+      DATABASE_NAME: ${DATABASE_NAME:?Set DATABASE_NAME in .env}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:?Set DATABASE_USERNAME in .env}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+      DATABASE_SSL: "false"
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./:/opt/app
+      - cms_node_modules:/opt/app/node_modules
+      - cms_uploads:/opt/app/public/uploads
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      target: dev
+    restart: unless-stopped
+    depends_on:
+      cms:
+        condition: service_started
+    environment:
+      NODE_ENV: development
+      CMS_API_URL: http://cms:1337
+      NEXT_PUBLIC_CMS_URL: http://localhost:1337
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web:/app
+      - web_node_modules:/app/node_modules
+      - web_next:/app/.next
+
+volumes:
+  cms_node_modules:
+  cms_uploads:
+  web_node_modules:
+  web_next:

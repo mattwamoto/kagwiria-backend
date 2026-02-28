@@ -52,6 +52,75 @@ npm run develop
 5. Open admin panel:
 - `http://localhost:1337/admin`
 
+## Installed Strapi Plugins
+- `strapi-plugin-oembed` (YouTube and other embed providers)
+- `@strapi/plugin-seo`
+- `strapi-google-analytics-dashboard`
+- `strapi-plugin-publisher` (scheduled publish/unpublish)
+- `strapi-plugin-email-designer-5`
+- `@strapi/provider-email-nodemailer`
+- `@strapi/provider-upload-cloudinary`
+- `@strapi-community/strapi-provider-upload-google-cloud-storage`
+
+The active upload provider is controlled by `UPLOAD_PROVIDER` in `.env`:
+- `local` (default)
+- `cloudinary`
+- `gcs`
+
+## Newsletter Flow
+- Public subscribe endpoint: `POST /api/newsletter/subscribe`
+- Protected campaign endpoint: `POST /api/newsletter/send` with `Authorization: Bearer <NEWSLETTER_API_TOKEN>`
+- Homepage email capture now uses `/api/newsletter/subscribe`.
+
+Recommended setup:
+1. Configure SMTP env vars (`SMTP_*`) in `.env`.
+2. In Strapi Admin, create Email Designer templates and set:
+   - `NEWSLETTER_WELCOME_TEMPLATE_ID`
+   - `NEWSLETTER_BROADCAST_TEMPLATE_ID`
+3. Restart Strapi and test:
+   - subscribe from homepage
+   - campaign send via API (use `dryRun: true` first)
+
+## Contact Auto-Reply
+- Contact form submissions (`source: contact`) trigger an automatic reply email.
+- Delivery order:
+  1. `email-designer-5` template (`CONTACT_AUTOREPLY_TEMPLATE_ID`) if configured
+  2. fallback plain HTML/text via Strapi `email` plugin (nodemailer provider)
+- Control flags:
+  - `CONTACT_AUTOREPLY_ENABLED=true|false`
+  - `CONTACT_AUTOREPLY_TEMPLATE_ID=<template-id>`
+  - `CONTACT_AUTOREPLY_SUBJECT=...`
+
+## Docker Quick Start (Backend + Frontend + External Postgres)
+1. Create env file for Docker:
+
+```bash
+cp .env.docker.example .env
+```
+
+2. Set your external Postgres credentials in `.env`:
+- `DATABASE_HOST`
+- `DATABASE_PORT`
+- `DATABASE_NAME`
+- `DATABASE_USERNAME`
+- `DATABASE_PASSWORD`
+- optional `DATABASE_URL`
+
+3. Start services:
+
+```bash
+docker compose up --build
+```
+
+4. Open apps:
+- Frontend: `http://localhost:3000`
+- Strapi Admin: `http://localhost:1337/admin`
+
+Notes:
+- `docker-compose.yml` expects an external Postgres database and runs Strapi with `DATABASE_CLIENT=postgres`.
+- Next.js uses `CMS_API_URL=http://cms:1337` (server-side) and `NEXT_PUBLIC_CMS_URL=http://localhost:1337` (browser-side).
+- Stop containers with `docker compose down` (add `-v` to also remove named volumes).
+
 ## Documentation Index
 - [Architecture](docs/architecture.md)
 - [Developer Guide](docs/developer-guide.md)

@@ -1,0 +1,14 @@
+node_modules
+dist
+.cache
+.tmp
+.strapi
+.git
+.gitignore
+apps
+coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.*

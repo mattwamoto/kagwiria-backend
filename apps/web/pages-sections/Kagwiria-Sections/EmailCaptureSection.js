@@ -25,14 +25,13 @@ export default function EmailCaptureSection() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/lead", {
+      const response = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          source: "newsletter",
-          fullName: "Newsletter Subscriber",
           email: email.trim(),
-          payload: { location: "home-email-capture" },
+          location: "home-email-capture",
+          payload: { source: "home" },
         }),
       });
 
@@ -42,7 +41,7 @@ export default function EmailCaptureSection() {
       }
 
       setEmail("");
-      setStatus("Subscribed successfully.");
+      setStatus(payload?.data?.duplicate ? "You are already subscribed." : "Subscribed successfully.");
     } catch (error) {
       setStatus(error.message || "Unable to subscribe right now.");
     } finally {
